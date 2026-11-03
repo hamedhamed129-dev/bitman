@@ -1,16 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [toman, setToman] = useState("");
-  const rate = 172000; // نرخ واقعی تتر
+  const [rate, setRate] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const usdtAmount = toman ? (Number(toman) / rate).toFixed(2) : "۰";
+  useEffect(() => {
+    async function fetchRate() {
+      try {
+        const res = await fetch("https://api.nobitex.ir/v2/orderbook/USDTIRT");
+        const data = await res.json();
+        
+        if (data.lastTradePrice) {
+          // قیمت به ریال است، تقسیم بر ۱۰ می‌کنیم
+          const tomanRate = Math.round(Number(data.lastTradePrice) / 10);
+          setRate(tomanRate);
+        }
+      } catch (error) {
+        console.log("خطا در دریافت نرخ");
+        setRate(172000); // نرخ پیش‌فرض در صورت خطا
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRate();
+    
+    // هر ۳۰ ثانیه یک‌بار به‌روزرسانی
+    const interval = setInterval(fetchRate, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const usdtAmount = toman && rate ? (Number(toman) / rate).toFixed(2) : "۰";
 
   return (
     <div className="min-h-screen bg-slate-100 text-gray-800" dir="rtl">
-      {/* هدر */}
       <header className="bg-blue-700 text-white sticky top-0 z-50 shadow-md">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold">بیتمان</div>
@@ -32,9 +58,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* بخش اصلی */}
       <main className="max-w-6xl mx-auto px-4 py-12">
-        {/* عنوان */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             خرید و فروش تتر و ارزهای دیجیتال
@@ -44,11 +68,10 @@ export default function Home() {
           </p>
         </div>
 
-        {/* ماشین‌حساب */}
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto mb-16 border-t-4 border-blue-600">
           <h2 className="text-xl font-bold mb-2 text-center text-blue-700">ماشین‌حساب تبدیل</h2>
           <p className="text-center text-sm text-gray-500 mb-6">
-            نرخ فعلی: {rate.toLocaleString()} تومان
+            {loading ? "در حال دریافت نرخ..." : `نرخ فعلی: ${rate.toLocaleString()} تومان`}
           </p>
           
           <div className="space-y-5">
@@ -82,7 +105,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* جدول قیمت‌ها */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-16">
           <div className="bg-blue-700 text-white px-6 py-4">
             <h2 className="text-xl font-bold">قیمت‌های لحظه‌ای</h2>
@@ -110,7 +132,7 @@ export default function Home() {
                     </div>
                   </td>
                   <td className="py-4 px-6 font-bold">
-                    {rate.toLocaleString()}
+                    {loading ? "..." : rate.toLocaleString()}
                   </td>
                   <td className="py-4 px-6">
                     <span className="text-green-600 bg-green-100 px-2.5 py-1 rounded-full text-xs font-medium">زنده</span>
@@ -127,7 +149,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ویژگی‌ها */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-7 rounded-2xl shadow-md text-center border-t-4 border-blue-500">
             <div className="text-4xl mb-3">⚡</div>
@@ -149,7 +170,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* فوتر */}
       <footer className="bg-blue-700 text-white mt-12 py-8 text-center text-sm">
         © ۱۴۰۴ بیتمان – همه حقوق محفوظ است
       </footer>
