@@ -10,17 +10,12 @@ export default function Home() {
   useEffect(() => {
     async function fetchRate() {
       try {
-        const res = await fetch("https://api.nobitex.ir/v2/orderbook/USDTIRT");
+        const res = await fetch("/api/rate");
         const data = await res.json();
-        
-        if (data.lastTradePrice) {
-          // قیمت به ریال است، تقسیم بر ۱۰ می‌کنیم
-          const tomanRate = Math.round(Number(data.lastTradePrice) / 10);
-          setRate(tomanRate);
-        }
+        setRate(data.rate);
       } catch (error) {
         console.log("خطا در دریافت نرخ");
-        setRate(172000); // نرخ پیش‌فرض در صورت خطا
+        setRate(172000);
       } finally {
         setLoading(false);
       }
@@ -28,7 +23,6 @@ export default function Home() {
 
     fetchRate();
     
-    // هر ۳۰ ثانیه یک‌بار به‌روزرسانی
     const interval = setInterval(fetchRate, 30000);
     return () => clearInterval(interval);
   }, []);
