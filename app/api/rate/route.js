@@ -1,24 +1,15 @@
 export async function GET() {
   try {
-    const [usdtRes, btcRes] = await Promise.all([
-      fetch("https://api.nobitex.ir/v2/orderbook/USDTIRT"),
-      fetch("https://api.nobitex.ir/v2/orderbook/BTCIRT")
-    ]);
+    const res = await fetch("https://iran-market.github.io/data/popular.json");
+    const data = await res.json();
 
-    const usdtData = await usdtRes.json();
-    const btcData = await btcRes.json();
-
-    const usdtRate = usdtData.lastTradePrice 
-      ? Math.round(Number(usdtData.lastTradePrice) / 10) 
-      : 172000;
-
-    const btcRate = btcData.lastTradePrice 
-      ? Math.round(Number(btcData.lastTradePrice) / 10) 
-      : 0;
+    // پیدا کردن قیمت تتر
+    const usdtItem = data.find(item => item.symbol === "USDT" || item.name?.includes("تتر"));
+    const usdtRate = usdtItem?.price || 172000;
 
     return Response.json({ 
-      usdt: usdtRate,
-      btc: btcRate
+      usdt: Math.round(usdtRate),
+      btc: 0
     });
   } catch (error) {
     return Response.json({ usdt: 172000, btc: 0 });
