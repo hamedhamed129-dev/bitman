@@ -1,15 +1,26 @@
 export async function GET() {
   try {
-    const res = await fetch("https://api.nobitex.ir/v2/orderbook/USDTIRT");
-    const data = await res.json();
+    const [usdtRes, btcRes] = await Promise.all([
+      fetch("https://api.nobitex.ir/v2/orderbook/USDTIRT"),
+      fetch("https://api.nobitex.ir/v2/orderbook/BTCIRT")
+    ]);
 
-    if (data.lastTradePrice) {
-      const tomanRate = Math.round(Number(data.lastTradePrice) / 10);
-      return Response.json({ rate: tomanRate });
-    }
+    const usdtData = await usdtRes.json();
+    const btcData = await btcRes.json();
 
-    return Response.json({ rate: 172000 });
+    const usdtRate = usdtData.lastTradePrice 
+      ? Math.round(Number(usdtData.lastTradePrice) / 10) 
+      : 172000;
+
+    const btcRate = btcData.lastTradePrice 
+      ? Math.round(Number(btcData.lastTradePrice) / 10) 
+      : 0;
+
+    return Response.json({ 
+      usdt: usdtRate,
+      btc: btcRate
+    });
   } catch (error) {
-    return Response.json({ rate: 172000 });
+    return Response.json({ usdt: 172000, btc: 0 });
   }
 }

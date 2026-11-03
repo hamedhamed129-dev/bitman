@@ -4,30 +4,29 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const [toman, setToman] = useState("");
-  const [rate, setRate] = useState(0);
+  const [rates, setRates] = useState({ usdt: 0, btc: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchRate() {
+    async function fetchRates() {
       try {
         const res = await fetch("/api/rate");
         const data = await res.json();
-        setRate(data.rate);
+        setRates(data);
       } catch (error) {
         console.log("خطا در دریافت نرخ");
-        setRate(172000);
+        setRates({ usdt: 172000, btc: 0 });
       } finally {
         setLoading(false);
       }
     }
 
-    fetchRate();
-    
-    const interval = setInterval(fetchRate, 30000);
+    fetchRates();
+    const interval = setInterval(fetchRates, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const usdtAmount = toman && rate ? (Number(toman) / rate).toFixed(2) : "۰";
+  const usdtAmount = toman && rates.usdt ? (Number(toman) / rates.usdt).toFixed(2) : "۰";
 
   return (
     <div className="min-h-screen bg-slate-100 text-gray-800" dir="rtl">
@@ -65,7 +64,7 @@ export default function Home() {
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto mb-16 border-t-4 border-blue-600">
           <h2 className="text-xl font-bold mb-2 text-center text-blue-700">ماشین‌حساب تبدیل</h2>
           <p className="text-center text-sm text-gray-500 mb-6">
-            {loading ? "در حال دریافت نرخ..." : `نرخ فعلی: ${rate.toLocaleString()} تومان`}
+            {loading ? "در حال دریافت نرخ..." : `نرخ فعلی تتر: ${rates.usdt.toLocaleString()} تومان`}
           </p>
           
           <div className="space-y-5">
@@ -126,7 +125,31 @@ export default function Home() {
                     </div>
                   </td>
                   <td className="py-4 px-6 font-bold">
-                    {loading ? "..." : rate.toLocaleString()}
+                    {loading ? "..." : rates.usdt.toLocaleString()}
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="text-green-600 bg-green-100 px-2.5 py-1 rounded-full text-xs font-medium">زنده</span>
+                  </td>
+                  <td className="py-4 px-6 text-center">
+                    <div className="flex justify-center gap-2">
+                      <a href="/trade" className="px-4 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700">خرید</a>
+                      <a href="/trade" className="px-4 py-1.5 border border-gray-300 text-gray-700 text-xs rounded-lg hover:bg-gray-50">فروش</a>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr className="hover:bg-blue-50 transition">
+                  <td className="py-4 px-6 font-medium">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">₿</div>
+                      <div>
+                        <div>بیت‌کوین</div>
+                        <div className="text-xs text-gray-500">BTC</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 font-bold">
+                    {loading ? "..." : rates.btc ? rates.btc.toLocaleString() : "---"}
                   </td>
                   <td className="py-4 px-6">
                     <span className="text-green-600 bg-green-100 px-2.5 py-1 rounded-full text-xs font-medium">زنده</span>
