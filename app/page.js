@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const [toman, setToman] = useState("");
-  const [rates, setRates] = useState({ usdt: 0, btc: 0 });
+  const [rates, setRates] = useState({ usdt: 0, btc: 0, btcToman: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function Home() {
         setRates(data);
       } catch (error) {
         console.log("خطا در دریافت نرخ");
-        setRates({ usdt: 172000, btc: 0 });
+        setRates({ usdt: 172000, btc: 0, btcToman: 0 });
       } finally {
         setLoading(false);
       }
@@ -149,7 +149,7 @@ export default function Home() {
                     </div>
                   </td>
                   <td className="py-4 px-6 font-bold">
-                    {loading ? "..." : rates.btc ? rates.btc.toLocaleString() : "---"}
+                    {loading ? "..." : rates.btcToman ? rates.btcToman.toLocaleString() : "---"}
                   </td>
                   <td className="py-4 px-6">
                     <span className="text-green-600 bg-green-100 px-2.5 py-1 rounded-full text-xs font-medium">زنده</span>
